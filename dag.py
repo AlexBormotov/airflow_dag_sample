@@ -10,8 +10,9 @@ import os
 from dotenv import load_dotenv
 import logging
 
-load_dotenv()
+load_dotenv() # in the root directory place a ".env" file where variables will be stored. They are not exported to GitHub
 
+# database credentials
 DATABASE = {
     'database': os.getenv('DB_NAME', 'postgres'),
     'user': os.getenv('POSTGRES_USER', 'user'),
@@ -21,15 +22,16 @@ DATABASE = {
     'connect_timeout': 2
 }
 
+# dag arguments
 args = {
     'owner': 'airflow',
     'start_date': dt.datetime(2023, 11, 27),
-    'retries': 1,
-    'retry_delay': dt.timedelta(minutes=5),
-    'depends_on_past': False,
-    'email': ['alexvicbor@gmail.com'],
-    'email_on_failure': True,
-    'email_on_success': False,
+    'retries': 1, # 1 retry attempt
+    'retry_delay': dt.timedelta(minutes=5), # retry after 5 minutes
+    'depends_on_past': False, # without backfill
+    'email': ['alexvicbor@gmail.com'], # allerting email
+    'email_on_failure': True, # in case when task fails - email will be sent
+    'email_on_success': False, # in case when task success' - no
 }
 
 def main_proc():
@@ -45,11 +47,10 @@ def main_proc():
 
     logging.info('completed')
     
-with DAG(dag_id = "connector_etl", default_args = args, schedule_interval = '0 12,0 * * *', catchup = False) as dag:
+with DAG(dag_id = "connector_etl", default_args = args, schedule_interval = '0 12,0 * * *', catchup = False) as dag: # dag settings here
     main_task = PythonOperator(
-        task_id='first_task',
-        python_callable=main_proc,
+        task_id='first_task', # task name will appear in AirFlow UI
+        python_callable=main_proc, # run main python function
         dag=dag
     )
-
-    main_task
+    main_task # task starts here
